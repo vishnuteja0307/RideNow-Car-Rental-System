@@ -1,0 +1,217 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #ffffff;
+  color: #171717;
+}
+
+.navbar-brand {
+  font-size: 26px;
+}
+
+.nav-link {
+  margin-left: 12px;
+  font-weight: 500;
+}
+
+.hero-section {
+  background: #f4f7fb;
+  padding: 60px 0;
+}
+
+.min-vh-75 {
+  min-height: 75vh;
+}
+
+.hero-title {
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin: 15px 0;
+}
+
+.hero-description {
+  font-size: 17px;
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 25px;
+}
+
+.hero-image {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.feature-card {
+  padding: 30px;
+  background: #f4f7fb;
+  border-radius: 10px;
+  border-bottom: 4px solid #2563eb;
+  height: 100%;
+}
+
+.feature-card h4 {
+  color: #dc2626;
+  margin-bottom: 12px;
+}
+
+.feature-card p {
+  color: #555;
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 36px;
+  }
+
+  .hero-image {
+    height: 250px;
+  }
+}
+
+
+
+.car-card {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  overflow: hidden;
+  height: 100%;
+  transition: 0.3s;
+}
+
+.car-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.12);
+}
+
+.car-card img {
+  width: 100%;
+  height: 210px;
+  object-fit: cover;
+}
+
+.booking-form {
+  max-width: 550px;
+  padding: 30px;
+  background: #f4f7fb;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+}
+
+.booking-form input {
+  padding: 11px;
+}
+
+.price-summary {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+}
+
+.booking-form {
+  max-width: 550px;
+  padding: 30px;
+  background: #f4f7fb;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+}
+
+.booking-card {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  height: 100%;
+}
+
+.booking-card p {
+  margin-bottom: 12px;
+  color: #444;
+}
+
+
+.auth-form {
+  max-width: 480px;
+  padding: 35px;
+  background: #f4f7fb;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+}
+
+.auth-form h2 {
+  color: #171717;
+}
+
+.auth-form input {
+  padding: 11px;
+}
+
+.auth-form a {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.auth-form a:hover {
+  color: #dc2626;
+}
+
+
+.admin-stat-card {
+  background: #f4f7fb;
+  padding: 25px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  border-left: 5px solid #2563eb;
+}
+
+.admin-stat-card h6 {
+  color: #555;
+  margin-bottom: 12px;
+}
+
+.admin-stat-card h2 {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.table th,
+.table td {
+  padding: 14px;
+  white-space: nowrap;
+}
+
+
+
+.admin-form-card {
+  background: #f4f7fb;
+  padding: 30px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+}
+
+.admin-form-card input,
+.admin-form-card select {
+  padding: 11px;
+}
+
+.admin-form-card button {
+  padding: 10px 22px;
+}
