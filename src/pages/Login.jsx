@@ -57,7 +57,7 @@ function Login() {
     <div className="container py-5">
       <div className="auth-form mx-auto">
         <h2 className="text-center fw-bold mb-2">
-          Welcome Back
+          Welcome 
         </h2>
 
         <p className="text-center text-muted mb-4">

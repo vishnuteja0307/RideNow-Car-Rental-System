@@ -2,6 +2,62 @@
 import { useEffect, useState } from "react";
 import { getCars } from "../data/cars";
 
+const START_DATE = "2026-11-19";
+const END_DATE = "2026-11-25";
+
+const formatDate = (date) => {
+  const [year, month, day] = date.split("-");
+  return `${day}-${month}-${year}`;
+};
+
+const addDays = (dateString, days) => {
+  const date = new Date(`${dateString}T00:00:00`);
+  date.setDate(date.getDate() + days);
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const createDemoBookings = (cars) => {
+  const dailyCounts = [4, 4, 4, 5, 4, 5, 4];
+  const demoBookings = [];
+  let customerNumber = 1;
+
+  dailyCounts.forEach((count, dayIndex) => {
+    const bookingDate = addDays(START_DATE, dayIndex);
+
+    for (let i = 0; i < count; i++) {
+      const car = cars.length
+        ? cars[(customerNumber - 1) % cars.length]
+        : { name: "Demo Car", price: 1000 };
+
+      const rentalDays = customerNumber % 2 === 0 ? 2 : 1;
+      const price = Number(car.price) || 1000;
+
+      demoBookings.push({
+        id: `demo-${bookingDate}-${i + 1}`,
+        customer: `Demo Customer ${String(customerNumber).padStart(2, "0")}`,
+        phone: "Demo Record",
+        car: car.name,
+        pickupDate: bookingDate,
+        returnDate: addDays(bookingDate, rentalDays),
+        rentalDays,
+        totalPrice: price * rentalDays,
+        status: customerNumber % 10 === 0 ? "Cancelled" : "Confirmed",
+        bookingDate,
+        isDemo: true,
+      });
+
+      customerNumber++;
+    }
+  });
+
+  return demoBookings;
+};
+
 function Admin() {
   const [bookings, setBookings] = useState([]);
   const [cars, setCars] = useState([]);
@@ -13,16 +69,31 @@ function Admin() {
   const [editId, setEditId] = useState(null);
 
   useEffect(() => {
-    loadBookings();
-    setCars(getCars());
-  }, []);
+    const availableCars = getCars();
+    setCars(availableCars);
 
-  const loadBookings = () => {
-    const savedBookings =
-      JSON.parse(localStorage.getItem("bookings")) || [];
+    let savedBookings = [];
+
+    try {
+      savedBookings = JSON.parse(localStorage.getItem("bookings")) || [];
+    } catch {
+      savedBookings = [];
+    }
+
+    // Add the 30 demo records only once.
+    const demoAlreadyExists = savedBookings.some(
+      (booking) => booking.isDemo === true
+    );
+
+    if (!demoAlreadyExists) {
+      const demoBookings = createDemoBookings(availableCars);
+      savedBookings = [...savedBookings, ...demoBookings];
+
+      localStorage.setItem("bookings", JSON.stringify(savedBookings));
+    }
 
     setBookings(savedBookings);
-  };
+  }, []);
 
   const saveCars = (updatedCars) => {
     localStorage.setItem("cars", JSON.stringify(updatedCars));
@@ -37,7 +108,7 @@ function Admin() {
       name,
       price: Number(price),
       category,
-      image: image.trim()
+      image: image.trim(),
     };
 
     let updatedCars;
@@ -103,6 +174,7 @@ function Admin() {
     alert("Booking cancelled successfully!");
   };
 
+  // Booking statistics
   const confirmed = bookings.filter(
     (booking) => booking.status === "Confirmed"
   ).length;
@@ -113,12 +185,39 @@ function Admin() {
 
   const totalRevenue = bookings
     .filter((booking) => booking.status === "Confirmed")
-    .reduce((total, booking) => total + Number(booking.totalPrice || 0), 0);
+    .reduce(
+      (total, booking) => total + Number(booking.totalPrice || 0),
+      0
+    );
 
-  // Show newest bookings first
-  const sortedBookings = [...bookings].sort(
-    (a, b) => Number(b.id) - Number(a.id)
+  // Prepare the seven-day booking report.
+  const sevenDays = Array.from({ length: 7 }, (_, index) =>
+    addDays(START_DATE, index)
   );
+
+  const dailyBookings = sevenDays.map((date) => ({
+    date,
+    count: bookings.filter(
+      (booking) => booking.bookingDate === date
+    ).length,
+  }));
+
+  const bookingsInPeriod = dailyBookings.reduce(
+    (total, day) => total + day.count,
+    0
+  );
+
+  const averageBookings = (bookingsInPeriod / 7).toFixed(2);
+
+  const maxDailyBookings = Math.max(
+    ...dailyBookings.map((day) => day.count),
+    1
+  );
+
+  // Show newest booking dates first.
+  const sortedBookings = [...bookings].sort((a, b) => {
+    return (b.bookingDate || "").localeCompare(a.bookingDate || "");
+  });
 
   return (
     <div className="container py-5">
@@ -131,36 +230,108 @@ function Admin() {
       </div>
 
       {/* Statistics */}
-      <div className="row g-4 mb-5">
+      <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-4 mb-5">
 
-        <div className="col-md-3">
-          <div className="admin-stat-card">
+        <div className="col">
+          <div className="admin-stat-card h-100">
             <h6>Total Cars</h6>
             <h2>{cars.length}</h2>
           </div>
         </div>
 
-        <div className="col-md-3">
-          <div className="admin-stat-card">
+        <div className="col">
+          <div className="admin-stat-card h-100">
             <h6>Total Bookings</h6>
             <h2>{bookings.length}</h2>
           </div>
         </div>
 
-        <div className="col-md-3">
-          <div className="admin-stat-card">
+        <div className="col">
+          <div className="admin-stat-card h-100">
             <h6>Confirmed</h6>
             <h2 className="text-success">{confirmed}</h2>
           </div>
         </div>
 
-        <div className="col-md-3">
-          <div className="admin-stat-card">
+        <div className="col">
+          <div className="admin-stat-card h-100">
             <h6>Cancelled</h6>
             <h2 className="text-danger">{cancelled}</h2>
           </div>
         </div>
 
+        <div className="col">
+          <div className="admin-stat-card h-100">
+            <h6>Average Bookings / Day</h6>
+            <h2 className="text-primary">{averageBookings}</h2>
+            <small className="text-muted">Last 7 days</small>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Seven Day Booking Report */}
+      <div className="admin-form-card mb-5">
+        <h4 className="fw-bold mb-1">Booking Analytics</h4>
+
+        <p className="text-muted mb-4">
+          Daily booking history from 19 November 2026 to 25 November 2026.
+        </p>
+
+        <div className="row g-3 mb-4">
+
+          <div className="col-md-6">
+            <div className="admin-stat-card h-100">
+              <h6>Total Bookings in 7 Days</h6>
+              <h2>{bookingsInPeriod}</h2>
+            </div>
+          </div>
+
+          <div className="col-md-6">
+            <div className="admin-stat-card h-100">
+              <h6>Average Bookings Per Day</h6>
+              <h2 className="text-primary">{averageBookings}</h2>
+              <small className="text-muted">
+                {bookingsInPeriod} bookings divided by 7 days
+              </small>
+            </div>
+          </div>
+
+        </div>
+
+        <h5 className="fw-bold mb-3">Daily Booking History</h5>
+
+        {dailyBookings.map((day) => (
+          <div className="mb-3" key={day.date}>
+
+            <div className="d-flex justify-content-between mb-1">
+              <span>{formatDate(day.date)}</span>
+              <strong>{day.count} bookings</strong>
+            </div>
+
+            <div
+              className="progress"
+              style={{ height: "12px" }}
+            >
+              <div
+                className="progress-bar bg-primary"
+                role="progressbar"
+                style={{
+                  width: `${(day.count / maxDailyBookings) * 100}%`,
+                }}
+                aria-valuenow={day.count}
+                aria-valuemin="0"
+                aria-valuemax={maxDailyBookings}
+              />
+            </div>
+
+          </div>
+        ))}
+
+        <small className="text-muted">
+          This report includes clearly labelled sample records created
+          for the project demonstration.
+        </small>
       </div>
 
       {/* Add / Edit Car */}
@@ -297,7 +468,7 @@ function Admin() {
 
       </div>
 
-      {/* Booking History */}
+      {/* Booking Management */}
       <div className="mb-3">
         <h4 className="fw-bold mb-1">Booking Management</h4>
         <p className="text-muted">
@@ -311,7 +482,7 @@ function Admin() {
           ₹{totalRevenue.toLocaleString("en-IN")}
         </h2>
         <small className="text-muted">
-          Excludes cancelled bookings
+          Excludes cancelled bookings. Includes demo records.
         </small>
       </div>
 
@@ -325,6 +496,7 @@ function Admin() {
 
             <thead className="table-dark">
               <tr>
+                <th>Booking Date</th>
                 <th>Customer</th>
                 <th>Phone</th>
                 <th>Car</th>
@@ -341,7 +513,20 @@ function Admin() {
               {sortedBookings.map((booking) => (
                 <tr key={booking.id}>
 
-                  <td>{booking.customer}</td>
+                  <td>
+                    {booking.bookingDate
+                      ? formatDate(booking.bookingDate)
+                      : "Not recorded"}
+                  </td>
+
+                  <td>
+                    {booking.customer}
+                    {booking.isDemo && (
+                      <span className="badge bg-secondary ms-1">
+                        Demo
+                      </span>
+                    )}
+                  </td>
 
                   <td>{booking.phone}</td>
 
